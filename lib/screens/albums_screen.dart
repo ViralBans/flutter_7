@@ -27,21 +27,20 @@ class _AlbumScreenState extends State<AlbumScreen>
         builder: (BuildContext context, AsyncSnapshot<List> snapshot) =>
             snapshot.hasData
                 ? ListView.builder(
-                    // render the list
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, index) => Card(
-                      // render list item
                       child: ListTile(
                         title: Text(snapshot.data![index]['name']),
                         onTap: () {
-                          String str = snapshot.data![index]['about'];
-                          Navigator.pushNamed(context, 'detail/${snapshot.data![index]['link']}/${snapshot.data![index]['about']}');
+                          Navigator.pushNamed(context, '/detail_artist', arguments: {
+                            'link': snapshot.data![index]['link'],
+                            'about': snapshot.data![index]['about']
+                          });
                         },
                       ),
                     ),
                   )
                 : const Center(
-                    // render the loading indicator
                     child: CircularProgressIndicator(),
                   ));
   }

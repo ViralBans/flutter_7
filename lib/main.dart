@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_7/fluro_router.dart';
 import 'package:flutter_7/screens/albums_screen.dart';
+import 'package:flutter_7/screens/detail_artist_screen.dart';
+import 'package:flutter_7/screens/error_screen.dart';
 import 'package:flutter_7/screens/home_screen.dart';
 
 void main() {
@@ -17,9 +18,62 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Title',),
-      initialRoute: '/',
-      onGenerateRoute: RouterFluro.router.generator,
+      home: MyHomePage(
+        title: 'Title',
+      ),
+      onUnknownRoute: (RouteSettings settings) {
+        return MaterialPageRoute(builder: (BuildContext context) {
+          return const ErrorScreen();
+        });
+      },
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case DetailArtist.routeName:
+            return PageRouteBuilder(pageBuilder: (
+              BuildContext context,
+              Animation animation,
+              Animation secondAnimation,
+            ) {
+              final args = settings.arguments as Map<String, dynamic>;
+              if (args.containsKey('link') && args.containsKey('about')) {
+                return DetailArtist(
+                  link: args['link'],
+                  about: args['about'],
+                );
+              } else {
+                return const DetailArtist(
+                  link: '',
+                  about: '',
+                );
+              }
+            }, transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondAnimation,
+              child,
+            ) {
+              CurvedAnimation curved = CurvedAnimation(
+                  parent: animation, curve: Curves.fastOutSlowIn);
+              Animation<double> animate =
+                  Tween(begin: 0.0, end: 1.0).animate(curved);
+              return ScaleTransition(
+                scale: animate,
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+              );
+            });
+          default:
+            return MaterialPageRoute(builder: (BuildContext context) {
+              return const ErrorScreen();
+            });
+        }
+      },
+      // routes: {
+      //   '/album': (context) => const AlbumScreen(),
+      //   '/detail': (context) => const DetailArtist(),
+      // },
     );
   }
 }
@@ -27,6 +81,7 @@ class MyApp extends StatelessWidget {
 class DrawerItem {
   String title;
   IconData icon;
+
   DrawerItem(this.title, this.icon);
 }
 
@@ -63,11 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).pop();
   }
 
-
   @override
   void initState() {
     super.initState();
-    RouterFluro.initRoutes();
   }
 
   @override
@@ -106,7 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 accountEmail: Text('email@gmail.com'),
                 accountName: Text('Username'),
                 currentAccountPicture: CircleAvatar(
-                  backgroundImage: NetworkImage('https://publicdomainvectors.org/photos/Male-Avatar-2.png'),
+                  backgroundImage: NetworkImage(
+                      'https://publicdomainvectors.org/photos/Male-Avatar-2.png'),
                 ),
               ),
               Column(children: drawerOptions)
